@@ -15,4 +15,5 @@ const articleRoutes = require('./routes/articleRoutes.js');
 const userRoutes = require('./routes/userRoutes');
 
 
-app.use('/api')
+app.use('/api/articles', articleRoutes);
+app.use('/api/users', userRoutes);
