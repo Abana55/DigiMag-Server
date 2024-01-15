@@ -7,7 +7,7 @@ const getArticles = async (req, res) => {
     }
 };
 
-const createArticle = sync (req, res) => {
+const createArticle = async (req, res) => {
     try {
         const {title, content, author} = req.body;
         const newArticle = new Article({title, content, author});
@@ -31,5 +31,21 @@ const updateArticle = async (req, res) => {
     }
 };
 
+const deleteArticle = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedArticle = await Article.findByIdAndDelete(id);
+        if (!deletedArticle) {
+            return res.status(404).json({ message: "Article not found" });
+        }
+        res.json({ message: "Article deleted successfully" });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+
 router.post('/', createArticle);
+router.put('/:id', updateArticle);
+router.delete('/:id', deleteArticle);
 
