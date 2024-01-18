@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../path/to/your/express/app'); // Import your Express app
+const app = require('../index'); 
 
 describe('GET /api/articles', () => {
     it('should retrieve all articles', async () => {

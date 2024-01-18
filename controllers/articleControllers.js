@@ -44,8 +44,10 @@ const deleteArticle = async (req, res) => {
     }
 };
 
-
-router.post('/', createArticle);
-router.put('/:id', updateArticle);
-router.delete('/:id', deleteArticle);
+module.exports = {
+    getArticles,
+    createArticle,
+    updateArticle,
+    deleteArticle
+};
 
