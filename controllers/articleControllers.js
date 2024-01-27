@@ -22,24 +22,23 @@ exports.getAllArticles = async (req, res) => {
     }
   };
 
-exports.createArticle = async (req, res) => {
+  exports.createArticle = async (req, res) => {
+    const { title, content, author } = req.body;
     try {
-        const {title, content, author} = req.body;
-        const newArticle = new Article({title, content, author});
-        await newArticle.save();
+        const [newArticleId] = await knex('articles').insert({ title, content, author });
+        const newArticle = await knex('articles').where('id', newArticleId).first();
         res.status(201).json(newArticle);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
-}
+};
 
 exports.updateArticle = async (req, res) => {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
-        const updatedArticle = await Article.findByIdAndUpdate(id, req.body, { new: true });
-        if (!updatedArticle) {
-            return res.status(404).json({ message: "Article not found" });
-        }
+        const updated = await knex('articles').where('id', id).update(req.body);
+        if (!updated) return res.status(404).json({ message: "Article not found" });
+        const updatedArticle = await knex('articles').where('id', id).first();
         res.json(updatedArticle);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -47,12 +46,10 @@ exports.updateArticle = async (req, res) => {
 };
 
 exports.deleteArticle = async (req, res) => {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
-        const deletedArticle = await Article.findByIdAndDelete(id);
-        if (!deletedArticle) {
-            return res.status(404).json({ message: "Article not found" });
-        }
+        const deleted = await knex('articles').where('id', id).del();
+        if (!deleted) return res.status(404).json({ message: "Article not found" });
         res.json({ message: "Article deleted successfully" });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -60,9 +57,10 @@ exports.deleteArticle = async (req, res) => {
 };
 
 module.exports = {
-    getArticles,
+    getAllArticles,
+    getArticleById,
     createArticle,
     updateArticle,
     deleteArticle
-};
+  };
 
