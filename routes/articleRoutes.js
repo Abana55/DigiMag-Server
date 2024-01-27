@@ -1,13 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const articleController = require('/Users/anb/Desktop/NewProjects/my-magazine-app/magezine-server/controllers/articleController');
+const {
+  getAllArticles,
+  getArticleById,
+  createArticle,
+  updateArticle,
+  deleteArticle
+} = require('../controllers/articleController');
 
-router.get('/', articleController.getArticles);
-router.post('/', articleController.createArticle);
-router.put('/:id', articleController.updateArticle);
-router.delete('/:id', articleController.deleteArticle);
+router.get('/', getAllArticles);
+router.get('/:id', getArticleById);
+router.post('/', createArticle);
+router.put('/:id', updateArticle);
+router.delete('/:id', deleteArticle);
 
 module.exports = router;
-
-console.log(__dirname);
-console.log(require('path').join(__dirname, '../controllers/articleController'));

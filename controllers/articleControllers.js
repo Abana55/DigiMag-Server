@@ -1,13 +1,28 @@
-const getArticles = async (req, res) => {
-    try {
-        const articles = await Article.find();
-        res.json(articles)
-    } catch (error) {
-        res.status(500).json({ message: error.message })
-    }
-};
+const knex = require('../knex');
 
-const createArticle = async (req, res) => {
+
+exports.getAllArticles = async (req, res) => {
+    try {
+      const articles = await knex.select('*').from('articles');
+      res.json(articles);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  };
+  
+  exports.getArticleById = async (req, res) => {
+    try {
+      const article = await knex('articles').where('id', req.params.id).first();
+      if (!article) {
+        return res.status(404).json({ message: "Article not found" });
+      }
+      res.json(article);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  };
+
+exports.createArticle = async (req, res) => {
     try {
         const {title, content, author} = req.body;
         const newArticle = new Article({title, content, author});
@@ -18,7 +33,7 @@ const createArticle = async (req, res) => {
     }
 }
 
-const updateArticle = async (req, res) => {
+exports.updateArticle = async (req, res) => {
     try {
         const { id } = req.params;
         const updatedArticle = await Article.findByIdAndUpdate(id, req.body, { new: true });
@@ -31,7 +46,7 @@ const updateArticle = async (req, res) => {
     }
 };
 
-const deleteArticle = async (req, res) => {
+exports.deleteArticle = async (req, res) => {
     try {
         const { id } = req.params;
         const deletedArticle = await Article.findByIdAndDelete(id);
