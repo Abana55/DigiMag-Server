@@ -2,7 +2,7 @@ const knex = require('../knex');
 
 
 exports.getAllArticles = async (req, res) => {
-    try {
+  try {
       const articles = await knex.select('*').from('articles');
       res.json(articles);
     } catch (err) {
