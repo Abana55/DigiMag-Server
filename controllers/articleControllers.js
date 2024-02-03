@@ -23,23 +23,30 @@ const getArticleById = async (req, res) => {
 };
 
 const createArticle = async (req, res) => {
-  const { title, content, authorId } = req.body; // Make sure these align with your table's column names
+  const { title, content, authorName, categoryId } = req.body;
+
+  if (!title || !content || !authorName || !categoryId) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
   try {
     const [newArticleId] = await knex("articles").insert({
       title,
       content,
-      authorId,
+      authorName,  
+      categoryId
     });
     const newArticle = await knex("articles").where("id", newArticleId).first();
     res.status(201).json(newArticle);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("Error in createArticle: ", error);
+    res.status(400).json({ message: "Error creating article", error: error.message });
   }
 };
 
 const updateArticle = async (req, res) => {
   const { id } = req.params;
-  const { title, content, authorId } = req.body; // Depending on what you allow to be updated
+  const { title, content, authorId } = req.body; 
   try {
     const updated = await knex("articles")
       .where("id", id)

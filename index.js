@@ -11,9 +11,11 @@ app.use(cors());
 
 const articleRoutes = require("./routes/articleRoutes");
 const userRoutes = require("./routes/userRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
 
 app.use("/api/articles", articleRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/categories", categoryRoutes);
 
 const PORT = process.env.PORT || 3000;
 
