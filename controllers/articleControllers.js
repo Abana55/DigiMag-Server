@@ -23,23 +23,28 @@ const getArticleById = async (req, res) => {
 };
 
 const createArticle = async (req, res) => {
-  const { title, content, authorName, categoryId } = req.body;
+  const { title, content, authorId, categoryId } = req.body;
 
-  if (!title || !content || !authorName || !categoryId) {
-    return res.status(400).json({ message: "Missing required fields" });
-  }
+  // Validation here for title, content, authorId, categoryId...
 
   try {
-    const [newArticleId] = await knex("articles").insert({
+    // Check if the author exists
+    const authorExists = await knex('users').where('id', authorId).first();
+    if (!authorExists) {
+      return res.status(404).json({ message: "Author not found" });
+    }
+    //insert article
+    const [newArticleId] = await knex('articles').insert({
       title,
       content,
-      authorName,  
-      categoryId
+      author_id: authorId,
+      category_id: categoryId,
     });
-    const newArticle = await knex("articles").where("id", newArticleId).first();
+
+    const newArticle = await knex('articles').where('id', newArticleId).first();
     res.status(201).json(newArticle);
   } catch (error) {
-    console.error("Error in createArticle: ", error);
+    console.error("Error creating article: ", error);
     res.status(400).json({ message: "Error creating article", error: error.message });
   }
 };
