@@ -1,10 +1,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const knex = require("../knex"); 
+const { authenticateToken } = require('../middleware/authMiddleware');
 
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const knex = require("../knex");
 
 
 const registerUser = async (req, res) => {
