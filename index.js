@@ -1,7 +1,8 @@
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
 
+const { authenticateToken } = require('./middleware/authenticateToken');
 const knex = require('./knex');
 
 const app = express();
