@@ -9,34 +9,21 @@ const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
-    return res
-      .status(400)
-      .json({ message: "Please provide all required fields." });
+    return res.status(400).json({ message: "Please provide all required fields." });
   }
-
   try {
-
     const userExists = await knex("users").where({ email }).first();
     if (userExists) {
-      return res
-        .status(400)
-        .json({ message: "User already exists with this email." });
+      return res.status(400).json({ message: "User already exists with this email." });
     }
-
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    const [newUserId] = await knex("users").insert(
-      {
-        username,
-        email,
-        password: hashedPassword,
-      },
-      "id"
-    ); 
-    const token = jwt.sign({ id: newUserId }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const [newUserId] = await knex("users").insert({
+      username,
+      email,
+      password_hash: hashedPassword, 
+    }, 'id');
+    const token = jwt.sign({ id: newUserId }, process.env.JWT_SECRET, { expiresIn: "1h" });
     res.status(201).json({
       message: "User registered successfully.",
       token,
@@ -59,7 +46,6 @@ const loginUser = async (req, res) => {
       .status(400)
       .json({ message: "Please provide both email and password." });
   }
-
   try {
     const user = await knex("users").where({ email }).first();
     if (!user) {
