@@ -9,55 +9,72 @@ const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
-    return res.status(400).json({ message: "Please provide all required fields." });
+    return res.status(400).json({ error: "Please provide username, email, and password" });
   }
+
   try {
-    const userExists = await knex("users").where({ email }).first();
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists with this email." });
+    const existingUser = await knex('users').where({ email }).first();
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already in use" });
     }
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const [newUserId] = await knex("users").insert({
+
+    const hashedPassword = await bcrypt.hash(password, 10); // Example uses bcrypt for password hashing
+
+    const [newUserId] = await knex('users').insert({
       username,
       email,
-      password_hash: hashedPassword, 
-    }, 'id');
-    const token = jwt.sign({ id: newUserId }, process.env.JWT_SECRET, { expiresIn: "1h" });
+      password: hashedPassword
+    });
+
+    
+    const newUser = await knex('users').select('id', 'username', 'email').where({ id: newUserId }).first();
+
     res.status(201).json({
-      message: "User registered successfully.",
-      token,
-      user: {
-        id: newUserId,
-        username,
-        email,
-      },
+      message: "User successfully registered",
+      user: newUser
     });
   } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({ message: "Server error during registration." });
+    console.error(`Registration error: ${error.message}`);
+    res.status(500).json({
+      message: `Server error during user registration: ${error.message}`
+    });
   }
 };
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
+  console.log("Login attempt:", email);
+
   if (!email || !password) {
+    console.log("Missing credentials");
     return res
       .status(400)
       .json({ message: "Please provide both email and password." });
   }
+
   try {
+    console.log("Searching for user:", email);
     const user = await knex("users").where({ email }).first();
+
     if (!user) {
+      console.log("User not found:", email);
       return res.status(400).json({ message: "User does not exist." });
     }
+
+    console.log("User found, comparing password...");
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
+      console.log("Invalid password for:", email);
       return res.status(400).json({ message: "Invalid credentials." });
     }
+
+    console.log("Password match, generating token...");
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
+
+    console.log("Login successful for:", email);
     res.json({
       message: "User logged in successfully.",
       token,
@@ -68,8 +85,8 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Server error during login." });
+    console.error("Login error for:", email, error);
+    res.status(500).json({ message: "Server error during login.", error: error.toString() });
   }
 };
 
